@@ -1,0 +1,19 @@
+version: 0.0
+resources:
+  - myApplication:
+      type: AWS::ECS::Application
+      properties:
+        taskDefinition: brain-tasks-app
+        loadBalancerInfo:
+          containerName: brain-tasks-app
+          containerPort: 80
+
+hooks:
+  BeforeInstall:
+    - location: scripts/validate-service.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: scripts/deploy-to-eks.sh
+      timeout: 600
+      runas: root
