@@ -1,27 +1,35 @@
 version: 0.2
+env:
+  variables:
+    IMAGE_REPO_NAME: brain-tasks-app
+    AWS_DEFAULT_REGION: ap-south-1
 
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
+      - echo Logging in to ECR...
       - aws --version
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 065217599733.dkr.ecr.ap-south-1.amazonaws.com
-      - REPOSITORY_URI=065217599733.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app
-      - IMAGE_TAG=$(date +%Y%m%d%H%M%S)
-
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 065217599733.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=065217599733.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
-  
+      - echo Build started `date`
+      - docker build -t $IMAGE_REPO_NAME:latest .
+      - docker tag $IMAGE_REPO_NAME:latest $REPOSITORY_URI:latest
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker image to ECR...
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
-      - printf '[{"name":"brain-tasks-app","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - docker push $REPOSITORY_URI:latest
+      - echo Creating appspec artifact...
+      - mkdir -p codedeploy_artifact
+      - cp appspec.yml codedeploy_artifact/
+      - mkdir -p codedeploy_artifact/k8s
+      - cp -R k8s/* codedeploy_artifact/k8s/
+      - cd codedeploy_artifact
+      - zip -r ../codedeploy_artifact.zip .
+      - cd ..
+      - printf '[{"name":"brain-tasks","imageUri":"%s"}]' $REPOSITORY_URI:latest > imagedefinitions.json
 
 artifacts:
-  files: imagedefinitions.json
+  files:
+    - imagedefinitions.json
+    - codedeploy_artifact.zip
