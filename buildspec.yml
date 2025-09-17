@@ -19,28 +19,18 @@ phases:
       - echo Build started on `date`
       - echo Building the Docker image...
       - docker build -t $IMAGE_REPO_NAME:latest .
-      - docker tag $IMAGE_REPO_NAME:latest $REPOSITORY_URI:latest
       - docker tag $IMAGE_REPO_NAME:latest $REPOSITORY_URI:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:latest $REPOSITORY_URI:latest
 
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image to ECR...
-      - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
+      - docker push $REPOSITORY_URI:latest
+      - echo Writing imagedefinitions.json for CodeDeploy/CodePipeline...
       - printf '[{"name":"brain-tasks-app","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
-      - echo Creating appspec artifact...
-      - mkdir -p codedeploy_artifact
-      - cp appspec.yml codedeploy_artifact/
-      - mkdir -p codedeploy_artifact/k8s
-      - cp -R k8s/* codedeploy_artifact/k8s/
-      - cd codedeploy_artifact
-      - zip -r ../codedeploy_artifact.zip .
-      - cd ..
-      - printf '[{"name":"brain-tasks","imageUri":"%s"}]' $REPOSITORY_URI:latest > imagedefinitions.json
 
 artifacts:
   files:
     - imagedefinitions.json
-    - codedeploy_artifact.zip
