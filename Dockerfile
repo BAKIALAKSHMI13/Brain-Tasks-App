@@ -1,11 +1,15 @@
 # Step 1: Use lightweight Node.js image
+<<<<<<< HEAD
 FROM node:18-alpine
+=======
+FROM node:21-alpine
+>>>>>>> f5eeeb4f16110aadbc11c021c59a580b7b353714
 
 # Step 3: Set working directory
 WORKDIR /app
 
 # Step 4: Copy dist folder into container
-COPY dist ./dist
+COPY . .
 
 # Step 5: Expose port 3000
 EXPOSE 3000
