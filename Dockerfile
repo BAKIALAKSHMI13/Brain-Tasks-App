@@ -5,7 +5,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Step 4: Copy dist folder into container
-COPY dist ./dist
+COPY . .
 
 # Step 5: Expose port 3000
 EXPOSE 3000
