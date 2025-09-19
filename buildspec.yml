@@ -32,5 +32,6 @@ phases:
       - printf '[{"name":"brain-tasks-app","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
-  files
+  files:
     - imagedefinitions.json
+    
