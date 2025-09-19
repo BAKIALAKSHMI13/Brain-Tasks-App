@@ -19,7 +19,7 @@ spec:
           # Use the ECR image you pushed earlier
           image: 065217599733.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app:latest
           ports:
-            - containerPort: 80
+            - containerPort: 3000
           readinessProbe:
             httpGet:
               path: /
